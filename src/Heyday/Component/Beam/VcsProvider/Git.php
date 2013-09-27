@@ -11,7 +11,7 @@ use Symfony\Component\Process\Process;
  * Class Git
  * @package Heyday\Component\Beam\VcsProvider
  */
-class Git implements VcsProvider
+class Git implements VcsProvider, VcsInformationProvider
 {
     /**
      * @var
@@ -164,6 +164,41 @@ class Git implements VcsProvider
         );
 
         return $process->getExitCode() == 0;
+    }
+    /**
+     * @inheritdoc
+     */
+    public function getBranchesContainingRef($ref)
+    {
+        $process = $this->process(
+            sprintf(
+                'git branch -a --contains %s',
+                escapeshellarg($ref)
+            )
+        );
+
+        $branches = explode("\n", trim($process->getOutput()));
+        foreach ($branches as &$branch) {
+            $branch = ltrim($branch, ' *');
+        }
+
+        return $branches;
+    }
+    /**
+     * @inheritdoc
+     */
+    public function getDistanceBetweenRefs($ref, $otherRef)
+    {
+        // Get the sha1 hash representing each ref
+        $process = $this->process(
+            sprintf(
+                'git rev-list %s...%s',
+                escapeshellarg($ref),
+                escapeshellarg($otherRef)
+            )
+        );
+
+        return substr_count( $process->getOutput(), "\n" );
     }
     /**
      * Get the identity of a user as defined in the git config

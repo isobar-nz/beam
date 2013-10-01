@@ -35,6 +35,7 @@ class Application extends BaseApplication
         $commands[] = new Command\MakeChecksumsCommand();
         $commands[] = new Command\BeamCompletionCommand();
         $commands[] = new Command\ValidateCommand();
+        $commands[] = new Command\StatusCommand();
 
         return $commands;
     }
